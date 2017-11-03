@@ -1,0 +1,21 @@
+{
+  "name": "startle",
+  "version": "1.0.0",
+  "description": "Client and Server agents for starting and stopping remote scripts.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test/*.js",
+    "cover": "istanbul cover _mocha -- test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomilous/startle.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nomilous/startle/issues"
+  },
+  "homepage": "https://github.com/nomilous/startle#readme"
+}
