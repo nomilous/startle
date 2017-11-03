@@ -17,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/nomilous/startle/issues"
   },
-  "homepage": "https://github.com/nomilous/startle#readme"
+  "homepage": "https://github.com/nomilous/startle#readme",
+  "devDependencies": {
+    "coveralls": "^3.0.0",
+    "expect.js": "^0.3.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^4.0.1"
+  }
 }
