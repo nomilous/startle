@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+
+const commander = require('commander');
+const { version } = require('../package');
+
+const program = commander
+
+  .version(version)
+  .option('-d, --debug', 'show debug output');
+
+program
+
+  .command('run-server')
+  .alias('rs')
+  .description('run a startle server')
+  .option('-p, --path <path>', 'REQUIRED assign path to repo root')
+  .option('-t, --token <string>', 'REQUIRED assign token or set TOKEN in env')
+  .option('-g, --group <string>', 'assign agent group(s)', collect, [])
+  .option('-H, --host <addr>', 'assign hostname to listen, default 0.0.0.0')
+  .option('-P, --port <num>', 'assign port to listen, default 59595')
+  .option('-k, --ssl-key-file <path>', 'use specified SSL key')
+  .option('-c, --ssl-cert-file <path>', 'use specified certificate')
+  .action(runAgent);
+
+program.on('--help', function () {
+  console.log('');
+  console.log('');
+  console.log('  Examples:');
+  console.log('');
+  console.log('    $ startle run-server -p . -t sEcRet -g group1 -g group2');
+  console.log('    $ TOKEN=sEcRet startle rs -p /home/me/repos/thing');
+  console.log('');
+});
+
+program.parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}
+
+function runAgent(options) {
+
+  if (program.debug) {
+    if (process.env.DEBUG) {
+      process.env.DEBUG += ',startle:*';
+    } else {
+      process.env.DEBUG = 'startle:*';
+    }
+  }
+
+  const { StartleServer } = require('../');
+
+  StartleServer.create(options)
+
+    .then(function (server) {
+
+      console.log(server);
+
+      function terminate(opts) {
+        console.log();
+        server.destroy().catch(console.error);
+        // process.exit(0);
+      };
+
+      process.on('SIGINT', terminate);
+      process.on('SIGTERM', terminate);
+    })
+
+    .catch(function (err) {
+      console.error(err);
+      process.exit(1);
+    });
+}
+
+
+function collect(val, memo) {
+  memo.push(val);
+  return memo;
+}
