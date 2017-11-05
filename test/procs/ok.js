@@ -3,7 +3,9 @@ var interval;
 
 startle.onStart(function (opts, done) {
 
-  interval = setInterval(() => {}, 1000);
+  interval = setInterval(() => {
+    console.log('running', __filename);
+  }, 1000);
   done();
 
 });
