@@ -15,7 +15,7 @@ program
   .description('run a startle server')
   .option('-p, --path <path>', 'REQUIRED assign path to repo root')
   .option('-t, --token <string>', 'REQUIRED assign token or set TOKEN in env')
-  .option('-g, --group <string>', 'assign agent group(s)', collect, [])
+  .option('-g, --group <string>', 'assign agent to group', collect, [])
   .option('-H, --host <addr>', 'assign hostname to listen, default 0.0.0.0')
   .option('-P, --port <num>', 'assign port to listen, default 59595')
   .option('-k, --ssl-key-file <path>', 'use specified SSL key')
@@ -50,11 +50,11 @@ function runAgent(options) {
 
   const { StartleServer } = require('../');
 
+  options.groups = options.group
+
   StartleServer.create(options)
 
     .then(function (server) {
-
-      console.log(server);
 
       function terminate(opts) {
         console.log();
