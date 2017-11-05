@@ -10,3 +10,4 @@ module.exports.StartleClient = require('./lib/StartleClient.js');
 
 module.exports.onStart = fn => child.start(fn, emitter);
 module.exports.onStop = child.stop;
+module.exports.send = child.send;

@@ -7,8 +7,15 @@ describe('test', function () {
   var server;
   var agent;
 
-  var pause = function (time) {
+  function pause(time) {
     return new Promise(resolve => setTimeout(resolve, time));
+  }
+
+  async function startAgent() {
+    agent = await StartleAgent.create({
+      rejectUnauthorized: false,
+      token: 'XXX'
+    });
   }
 
   before('start server', async function () {
@@ -169,7 +176,29 @@ describe('test', function () {
 
   context('messages', function () {
 
-    it('can send and receive messages');
+    it('can send and receive messages', function (done) {
+      var proc;
+      agent.start('test/procs/message')
+        .then(_proc => {
+          proc = _proc;
+          return new Promise((resolve, reject) => {
+            proc.send('message-name', 1, { value: 1 });
+            proc.on('message-name-reply', (arg1, arg2) => {
+              expect(arg1).to.be(2);
+              expect(arg2).to.eql({ value: 2 });
+              resolve();
+            });
+          });
+        })
+        .then(() => {
+          console.log('stop process');
+          return proc.stop();
+        })
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
 
   });
 
@@ -180,6 +209,38 @@ describe('test', function () {
     it('spreads according to unspecified group');
 
     it('errors if no group match');
+
+  });
+
+  context('disconnect', function () {
+
+    it('logs error from client if disconnect while processes running',
+      async function () {
+        // and kill processes on server
+        var error;
+        agent.on('error', err => error = err);
+        var proc = await agent.start('test/procs/ok');
+        var pid = server.sockets[0].procs[0].child.pid;
+        await server.destroy();
+        await pause(200);
+
+        expect(error.message).to.match(/^Disconnected from/);
+        expect(agent.servers[0].procs.length).to.be(0);
+        expect(server.sockets.length).to.be(0);
+
+        // reconnect
+        await server.start();
+        await agent.connect();
+
+        try {
+          process.kill(pid, 0);
+        } catch (e) {
+          // good, no such process
+          return;
+        }
+        throw new Error('child still present');
+      }
+    );
 
   });
 
