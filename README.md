@@ -18,10 +18,6 @@ See also [netrix](https://www.npmjs.com/package/netrix) for easily collecting me
 npm install startle --save-dev
 ```
 
-```javascript
-const startle = require('startle');
-```
-
 
 
 # Startle Server
@@ -44,11 +40,15 @@ The server runs a websocket (socket.io) over an https server. A self-signed ssl 
 
 See `startle —help` and `startle run-server —help`.
 
-
+The cli wraps an instance of the [StartleServer](class-startleserver) class.
 
 
 
 # Remote Script API
+
+```javascript
+const startle = require('startle');
+```
 
 These methods are used in the scripts installed on each host running the StartleServer. They will be called upon remotely to start/stop by the [controlling process](controlling-process-api).
 
@@ -101,18 +101,15 @@ These methods are used in the test script running on your workstation. They allo
 
 ### startle.createAgent(connections[, defaults])
 
-* `connections` \<Array of Objects> Connection parameters of StartleServer(s) to connect to.
+* `connections` \<Object> Connection parameters (or Array of connection parameters) of StartleServer(s) to connect to.
+  * `token` \<string> Required. The security token with which the server was initialised.
+  * `host` \<string> Hostname or ipaddress where the server is listening.
+  * `port` \<number> Server's port.
+  * `rejectUnauthorized` \<boolean> Set true if the server is using self-signed cert.
 * `defaults` \<Object> Defaults to apply across `connections` array.
-* Returns \<Promise> Resolves with a connected instance of [class starle.StartleAgent](class-startlestartleagent)
+* Returns \<Promise> Resolves with a connected instance of [class StartleAgent](class-startleagent)
 
-Create an agent connected to all StartleServers for remote controlling processes at each.
-
-Each parameters item in the `connections` array contains:
-
-* `token` \<string> Required. The security token with which the server was initialised.
-* `host` \<string> Hostname or ipaddress where the server is listening.
-* `port` \<number> Server's port.
-* `rejectUnauthorized` \<boolean> Set true if the server is using self-signed cert.
+Create an agent connected to all StartleServers for remote controlling processes at each. 
 
 Example (mocha, ES6):
 
@@ -167,9 +164,33 @@ after('stop agent', function () {
 
 
 
-## class startle.StartleAgent
+## class StartleAgent
 
-### new startle.StartleAgent(connections[, defaults]) 
+```javascript
+const { StartleAgent } = require('startle');
+```
 
-See [startle.createAgent(connections[, defaults])](startlecreateagentconnections-defaults)
+Agent interface for connecting to multiple [StartleServers](class-startleserver) and spawning processes on each.
+
+### new StartleAgent(connections[, defaults]) 
+
+* `connections` \<Object> Same as `startle.createAgent()`
+* `defaults` \<Object> Same as `startle.createAgent()`
+* Returns \<StartleAgent>
+
+See [startle.createAgent(connections[, defaults])](startlecreateagentconnections-defaults) to shortcut using this constructor.
+
+
+
+
+
+
+
+
+
+## class StartleServer
+
+```javascript
+const { StartleServer } = require('startle');
+```
 
