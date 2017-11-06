@@ -10,10 +10,6 @@ See also [netrix](https://www.npmjs.com/package/netrix) for easily collecting me
 
 
 
-* The timeout thing...
-
-
-
 ```
 npm install startle --save-dev
 ```
@@ -22,7 +18,7 @@ npm install startle --save-dev
 
 # Startle Server
 
-Each host upon which scripts are to be run needs a running startle server. This can be found at `node_modules/.bin/startle` if not installed globally. 
+Each host upon which scripts are to be run needs a running Startle Server. This can be found at `node_modules/.bin/startle` if not installed globally. 
 
 ```
 // on hosts 1 through 10
@@ -40,7 +36,7 @@ The server runs a websocket (socket.io) over an https server. A self-signed ssl 
 
 See `startle —help` and `startle run-server —help`.
 
-The cli wraps an instance of the [StartleServer](class-startleserver) class.
+The cli wraps an instance of the [StartleServer](#class-startleserver) class.
 
 
 
@@ -50,7 +46,7 @@ The cli wraps an instance of the [StartleServer](class-startleserver) class.
 const startle = require('startle');
 ```
 
-These methods are used in the scripts installed on each host running the StartleServer. They will be called upon remotely to start/stop by the [controlling process](controlling-process-api).
+These methods are used in the scripts installed on each host running the Startle Server. They will be called upon remotely to start/stop by the [controlling process](#controlling-process-api).
 
 ### startle.onStart(handler)
 
@@ -72,7 +68,7 @@ Subscribe to receive events from the controlling process.
 - `eventName` \<string> Event name to send to the controlling process.
 - `…args` 
 
-Example:
+##### Example1
 
 ```javascript
 startle.onStart((opts, done) => {
@@ -87,7 +83,7 @@ startle.onStop((opts, done) => {
 
 startle.on('switch-mode', function (newMode) {
   // do something
-  startle.send('switch-mode-done');
+  startle.send('switch-mode-done', {some: 'response'});
 });
 ```
 
@@ -97,7 +93,7 @@ startle.on('switch-mode', function (newMode) {
 
 # Controlling Process API
 
-These methods are used in the test script running on your workstation. They allow for spawning, terminating and interacting with all the [remote script](remote-script-api) processes at all the hosts running the StartleServer.
+These methods are used in the test script running on your workstation. They allow for spawning, terminating and interacting with all the [remote script](#remote-script-api) processes at all the hosts running the StartleServer.
 
 ### startle.createAgent(connections[, defaults])
 
@@ -107,13 +103,14 @@ These methods are used in the test script running on your workstation. They allo
   * `port` \<number> Server's port.
   * `rejectUnauthorized` \<boolean> Set true if the server is using self-signed cert.
 * `defaults` \<Object> Defaults to apply across `connections` array.
-* Returns \<Promise> Resolves with a connected instance of [class StartleAgent](class-startleagent)
+* Returns \<Promise> Resolves with a connected instance of [class StartleAgent](#class-startleagent)
 
 Create an agent connected to all StartleServers for remote controlling processes at each. 
 
-Example (mocha, ES6):
+##### Example2
 
 ```javascript
+// (mocha, ES6)
 var agent;
 
 before('start agent', async function () {
@@ -144,9 +141,10 @@ after('stop agent', async function () {
 });
 ```
 
-Example (mocha, ES5):
+##### Example3
 
 ```javascript
+// (mocha, ES5)
 var agent;
 
 before('start agent', function() {
@@ -164,13 +162,15 @@ after('stop agent', function () {
 
 
 
+
+
 ## class StartleAgent
 
 ```javascript
 const { StartleAgent } = require('startle');
 ```
 
-Agent interface for connecting to multiple [StartleServers](class-startleserver) and spawning processes on each.
+Agent interface for connecting to multiple [Startle Servers](#startle-server) and spawning processes on each.
 
 ### new StartleAgent(connections[, defaults]) 
 
@@ -178,13 +178,159 @@ Agent interface for connecting to multiple [StartleServers](class-startleserver)
 * `defaults` \<Object> Same as `startle.createAgent()`
 * Returns \<StartleAgent>
 
-See [startle.createAgent(connections[, defaults])](startlecreateagentconnections-defaults) to shortcut using this constructor.
+**Used internally.**  See [startle.createAgent(connections[, defaults])](#startlecreateagentconnections-defaults).
+
+### agent.connect()
+
+* Returns \<Promise> Resolves with the agent instance.
+
+Connects to all Startle Servers passes into the `connections`  parameter of the constructor.
+
+**Used internally.**  See [startle.createAgent(connections[, defaults])](#startlecreateagentconnections-defaults).
+
+### agent.destroy()
+
+* Returns \<Promise>
+
+Disconnects from all Startle Servers. 
+
+See example in [mocha after hook](#example3).
+
+This method is typically run in an "after hook" and should only be run once all remote processes have been stopped. See [startleProcess.stop([localOpts]\[, opts])](#startleprocessstoplocalopts-opts). If it runs when remote processes are still busy an error is logged to console. Note that the Startle Server will terminate any stray processes on the disconnection anyway.
+
+### agent.start(script[, opts])
+
+* `script` \<string || Object> Path of the remote script to run. Or object containing:
+  * `script` \<string> Required. Path of the remote script to run.
+  * `group` \<string> The server group within which to run the script.
+  * `timeout` \<number> Timeout waiting for script to start. Default 10 seconds.
+* `opts` \<Object || Function> Options to pass to the remote script's onStart handler.
+* Returns \<Promise> Resolves with running instance if [class StartleProcess](class-startleprocess)
+
+The `script` parameter must contain the script's path relative to the remote repo root as passed to the Startle Server.
+
+##### Example5
+
+```
+// at remote
+startle run-server --path /home/you/git_repos/repo-name
+```
+
+```javascript
+// in local test will start remote script at path:
+// /home/you/git_repos/repo-name/test/procs/some-script.js
+agent.start('test/procs/some-script').then...
+```
+
+Specifying the `group` allows for the starting of multiple scripts that will be spread evenly across all Startle Servers that were started with that group name.
+
+**Important:** In hooks and tests the mocha timeout should be disabled because the `agent.start()` method will not know when the test of hook times out and will continue in the background. Instead the 
+
+##### Example6
+
+```javascript
+var servers;
+
+before('start 10 servers', async function () {
+  this.timeout(0); // !must! allow agent.start() to handle timeout
+  
+  var promises = [];
+  for (var i = 0; i < 10; i++) {
+    promises.push(agent.start({
+      script: 'test/procs/cluster-server',
+      group: 'servers', // spread across all servers in this group
+      timeout: 10000    // the default timeout
+    }));
+  }
+  
+  servers = await Promise.all(promises)
+});
+
+after('stop servers', async function () {
+  this.timeout(0);
+  await Promise.all(servers.map(server => server.stop()));
+});
+
+```
+
+The `opts` are passed to the remote script's onStart handler ([Example1](#example1)). `opts` can either be an Object or a Function. The function will be run locally to generate the `opts` that will be passed to the remote server. The function is passed a `state` containing details of all the processes already started arranged by group.
+
+##### Example7
+
+```javascript
+// opts as object
+
+agent.start('test/procs/cluster-client', {opt: 'ions'})
 
 
+// opts as function
 
+agent.start('test/procs/cluster-server', function (state) {
+  // return an object to become the [opts]
+  return {
+    // eg. only the first server started seeds the cluster
+    seedTheCluster: state.groups['servers'] == 'undefined' ? true : false
+  }
+})
+```
 
+## class StartleProcess
 
+### new StartleProcess(opts) 
 
+**Used internally.**
+
+### startleProcess.hostname
+
+The hostname of the server where this process was started.
+
+### startleProcess.address
+
+The first public IP address of the server where this process was started.
+
+### startleProcess.run
+
+The run options passed to this process.
+
+### startleProcess.opts
+
+The script start opts passed to this process.
+
+### startleProcess.state
+
+`starting`, `running`, `stopping`, `killing`, `ended`
+
+### startleProcess.timestamp
+
+The state's timestamp.
+
+### startleProcess.stop([localOpts]\[, opts])
+
+* `localOpts`
+  * `timeout` \<number> Timeout for stop. Default 10 seconds.
+* Returns \<Promise> Waits for stop confirmation from the remote server.
+
+Stop the remote process cleanly. This calls then onStop() handler in the remote script and passes`opts` to it  ([Example1](#example1)). The handler is expected to tear down the process and it should then exit gracefully. If it does not then some or other resources are not being relinquished. Try `startleProcess.kill()` if all else fails.
+
+See after hook in [Example6](#example6)
+
+**Important:** For stops that take long the mocha timeout should be disabled. Use `localOpts.timeout` argument instead.
+
+### startleProcess.kill([localOpts])
+
+* `localOpts`
+  * `timeout` \<number> Timeout for stop. Default 10 seconds.
+* Returns \<Promise> Waits for kill confirmation from the remote server.
+
+Kill the remote process.
+
+### startleProcess.send(eventName[, …args])
+
+Send event to the remote process.
+
+### startleProcess.on(eventName, handler)
+
+Subscribe to receive event from the remote process.
 
 
 
@@ -193,4 +339,16 @@ See [startle.createAgent(connections[, defaults])](startlecreateagentconnections
 ```javascript
 const { StartleServer } = require('startle');
 ```
+
+**Used internally.**
+
+
+
+## class StartleClient
+
+```javascript
+  const { StartleClient } = require('startle');
+```
+
+**Used internally.**
 
