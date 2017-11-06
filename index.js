@@ -3,7 +3,7 @@ const emitter = new EventEmitter();
 const child = require('./lib/child');
 const StartleServer = require('./lib/StartleServer.js');
 const StartleAgent = require('./lib/StartleAgent.js');
-const StartleClient = require('./lib/StartleClient.js')
+const StartleClient = require('./lib/StartleClient.js');
 
 module.exports = emitter;
 

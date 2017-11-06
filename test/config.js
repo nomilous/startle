@@ -33,17 +33,15 @@ describe('config', function () {
   });
 
   it('supports process start opts as function', async function () {
-    var optsFn = (opts) => {
-      return {
-        x: opts.sequence
-      }
+    var optsFn = (state) => {
+      return Object.keys(state.groups);
     }
 
     var proc1 = await agent.start('test/procs/ok', optsFn);
     var proc2 = await agent.start('test/procs/ok', optsFn);
 
-    expect(agent.servers[0].procs[0].opts).to.eql({x: 0});
-    expect(agent.servers[0].procs[1].opts).to.eql({x: 1});
+    expect(agent.servers[0].procs[0].opts).to.eql([]);
+    expect(agent.servers[0].procs[1].opts).to.eql(['any']);
 
     await proc1.stop();
     await proc2.stop();
