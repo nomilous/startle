@@ -81,9 +81,8 @@ startle.onStop((opts, done) => {
   done();
 });
 
-startle.on('switch-mode', function (newMode) {
-  // do something
-  startle.send('switch-mode-done', {some: 'response'});
+startle.on('ping', function (timbre) {
+  startle.send('pong', {assentionRate: 777});
 });
 ```
 
@@ -205,7 +204,7 @@ This method is typically run in an "after hook" and should only be run once all 
   * `group` \<string> The server group within which to run the script.
   * `timeout` \<number> Timeout waiting for script to start. Default 10 seconds.
 * `opts` \<Object || Function> Options to pass to the remote script's onStart handler.
-* Returns \<Promise> Resolves with running instance if [class StartleProcess](class-startleprocess)
+* Returns \<Promise> Resolves with running instance if [class StartleProcess](#class-startleprocess)
 
 The `script` parameter must contain the script's path relative to the remote repo root as passed to the Startle Server.
 
@@ -331,6 +330,35 @@ Send event to the remote process.
 ### startleProcess.on(eventName, handler)
 
 Subscribe to receive event from the remote process.
+
+##### Example 8
+
+Assume we already have an agent per [Example3](#example3) and spawning process in [Example1](#Example1)
+
+```javascript
+var remoteProcess; // becomes instance of startleProcess
+
+before('start remote process', function () {
+  this.timeout(0);
+  return agent.start('test/procs/process1', {op: 'tions'})
+    .then(function (rp) {
+      remoteProcess= rp;
+    })
+});
+
+after('stop remote process', function () {
+  if (!remoteProcess) return;
+  this.timeout(0);
+  return remoteProcess.stop({op: 'tions'});
+});
+
+it('e.g. sends message to process', function (done) {
+  remoteProcess.send('ping', 23);
+  remoteProcess.on('pong', function (natureOfPong) {
+    // 
+  });
+});
+```
 
 
 
