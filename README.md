@@ -333,7 +333,7 @@ Subscribe to receive event from the remote process.
 
 ##### Example 8
 
-Assume we already have an agent per [Example3](#example3) and spawning process in [Example1](#Example1)
+Assume we already have an agent per [Example3](#example3) and spawning process in [Example1](#example1)
 
 ```javascript
 var remoteProcess; // becomes instance of startleProcess
