@@ -136,7 +136,7 @@ before('start agent', async function () {
 });
 
 after('stop agent', async function () {
-  await agent.destroy();
+  if (agent) await agent.destroy();
 });
 ```
 
@@ -155,6 +155,7 @@ before('start agent', function() {
 });
 
 after('stop agent', function () {
+  if (!agent) return;
   return agent.destroy();
 });
 ```
