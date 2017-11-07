@@ -253,7 +253,7 @@ after('stop servers', async function () {
 
 ```
 
-The `opts` are passed to the remote script's onStart handler ([Example1](#example1)). `opts` can either be an Object or a Function. The function will be run locally to generate the `opts` that will be passed to the remote server. The function is passed a `state` containing details of all the processes already started arranged by group.
+The `opts` are passed to the remote script's onStart handler ([Example1](#example1)). `opts` can either be an Object or a Function. The function will be run locally to generate the `opts` that will be passed to the remote server. The function is passed a `state` containing details of all the processes already started arranged by group as well as the count of processes already present in the given group.
 
 ##### Example7
 
@@ -269,7 +269,7 @@ agent.start('test/procs/cluster-server', function (state) {
   // return an object to become the [opts]
   return {
     // eg. only the first server started seeds the cluster
-    seedTheCluster: state.groups['servers'] == 'undefined' ? true : false
+    seedTheCluster: state.count == 0
   }
 })
 ```
