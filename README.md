@@ -253,7 +253,7 @@ after('stop servers', async function () {
 
 ```
 
-The `opts` are passed to the remote script's onStart handler ([Example1](#example1)). `opts` can either be an Object or a Function. The function will be run locally to generate the `opts` that will be passed to the remote server. The function is passed a `state` containing details of all the processes already started arranged by group as well as the count of processes already present in the given group.
+The `opts` are passed to the remote script's onStart handler ([Example1](#example1)). `opts` can either be an Object or a Function. The function will be run locally to generate the `opts` that will be passed to the remote server. The function is passed a `state` containing details of all the processes already started arranged by `group` as well as the `count` of processes already present in the given group and the `target` server where the process will be started.
 
 ##### Example7
 
@@ -332,7 +332,7 @@ Send event to the remote process.
 
 Subscribe to receive event from the remote process.
 
-##### Example 8
+##### Example 9
 
 Assume we already have an agent per [Example3](#example3) and spawning process in [Example1](#example1)
 
