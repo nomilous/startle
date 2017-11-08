@@ -332,7 +332,7 @@ Send event to the remote process.
 
 Subscribe to receive event from the remote process.
 
-##### Example 9
+##### Example 8
 
 Assume we already have an agent per [Example3](#example3) and spawning process in [Example1](#example1)
 
@@ -380,4 +380,20 @@ const { StartleServer } = require('startle');
 ```
 
 **Used internally.**
+
+
+
+##Remote Script API supports async/await 
+
+##### Example9
+
+```javascript
+const startle = require('startle');
+const Server = require('...');
+var server;
+
+startle.onStart(async opts => server = await Server.create(opts));
+
+startle.onStop(async opts => await server.stop(opts));
+```
 
