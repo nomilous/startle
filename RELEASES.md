@@ -9,3 +9,6 @@
 
 ### 2017/11/11 - 1.3.0
 * added metrics collection
+
+### 2017/11/11 - 1.3.1
+* prepend group. to group metrics 

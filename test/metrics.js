@@ -72,7 +72,7 @@ describe('metrics', function () {
       agent.removeListener('metrics', onMetrics);
       expect(collected.counters.counter_name).to.be.greaterThan(100);
       expect(collected.gauges.gauge_name).to.be(0.5);
-      expect(collected.gauges.any).to.be(4); // 4 processes in group any
+      expect(collected.gauges['group.any']).to.be(4); // 4 processes in group any
       done();
     }, 2000);
 
