@@ -12,3 +12,6 @@
 
 ### 2017/11/11 - 1.3.1
 * prepend group. to group metrics 
+
+### 2017/11/11 - 1.3.2
+* add value arg to increment 

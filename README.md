@@ -70,9 +70,10 @@ Subscribe to receive events from the controlling process.
 
 Remote scripts can be instrumented by incrementing counters and setting gauges. These metrics are aggregated (per second) and emitted at the Controlling Process. 
 
-### startle.increment(counterName)
+### startle.increment(counterName[, value])
 
 * `counterName` \<string> Increment an instrumentation counter.
+* `value` \<integer> Default 1
 
 ### startle.gauge(gaugeName, value)
 
