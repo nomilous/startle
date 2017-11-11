@@ -6,3 +6,6 @@
 
 ### 2017/11/08 - 1.2.0
 * added state.target to opts function
+
+### 2017/11/11 - 1.3.0
+* added metrics collection

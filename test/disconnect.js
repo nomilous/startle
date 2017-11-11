@@ -61,8 +61,8 @@ describe('disconnect', function () {
       // expect(server.sockets.length).to.be(0);
 
       // reconnect
-      await server.start();
-      await agent.connect();
+      // await server.start();
+      // await agent.connect();
 
       expect(message).to.match(/Disconnected from/);
 

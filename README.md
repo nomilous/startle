@@ -4,7 +4,7 @@
 
 Client and Server agents for starting, stopping and messaging remote scripts.
 
-Intended primarily for use in capacity testing distributed applications where processes spanning multiple servers are required. Remote processes can be started, stopped and communicated with via a single test script running on one developer workstation. 
+Intended primarily for use in capacity testing distributed applications where processes spanning multiple servers are required. Remote processes can be started, stopped, instrumented and communicated with via a single test script running on one developer workstation. 
 
 See also [netrix](https://www.npmjs.com/package/netrix) for easily collecting metrics from the running test.
 
@@ -68,6 +68,17 @@ Subscribe to receive events from the controlling process.
 - `eventName` \<string> Event name to send to the controlling process.
 - `…args` 
 
+Remote scripts can be instrumented by incrementing counters and setting gauges. These metrics are aggregated (per second) and emitted at the Controlling Process. 
+
+### startle.increment(counterName)
+
+* `counterName` \<string> Increment an instrumentation counter.
+
+### startle.gauge(gaugeName, value)
+
+* `gaugeName` \<string> The gauge to set.
+* `value` \<number> The value
+
 ##### Example1
 
 ```javascript
@@ -82,6 +93,10 @@ startle.onStop((opts, done) => {
 });
 
 startle.on('ping', function (timbre) {
+  
+  startle.increment('counter_name');
+  startle.gauge('gauge_name', 0.5);
+  
   startle.send('pong', {assentionRate: 777});
 });
 ```
@@ -132,7 +147,11 @@ before('start agent', async function () {
     rejectUnauthorized: false
   }
   
-  agent = await startle.createAgent(connections, defaults)
+  agent = await startle.createAgent(connections, defaults);
+  
+  agent.on('metrics', (timestamp, metrics) => {
+    // use metrics collected from remote processes
+  });
 });
 
 after('stop agent', async function () {
@@ -180,6 +199,17 @@ Agent interface for connecting to multiple [Startle Servers](#startle-server) an
 
 **Used internally.**  See [startle.createAgent(connections[, defaults])](#startlecreateagentconnections-defaults).
 
+`StartleAgent` is an EventEmitter and emits the following events:
+
+### Event: 'metrics'
+
+* `timestamp` \<number> EPOCH Milliseconds.
+* `metrics` \<Object>
+  * `counters` \<Object> Aggregated counter values.
+  * `gauges` \<Object> Aggregated guage values including count or processes by group name.
+
+Emitted every second with instrumentaion data collected from all remote processes using the `startle.increment()` and `startle.gauge()` functions. 
+
 ### agent.connect()
 
 * Returns \<Promise> Resolves with the agent instance.
@@ -197,6 +227,10 @@ Disconnects from all Startle Servers.
 See example in [mocha after hook](#example3).
 
 This method is typically run in an "after hook" and should only be run once all remote processes have been stopped. See [startleProcess.stop([localOpts]\[, opts])](#startleprocessstoplocalopts-opts). If it runs when remote processes are still busy an error is logged to console. Note that the Startle Server will terminate any stray processes on the disconnection anyway.
+
+### agent.reset()
+
+Resets metrics. Removes all counters and gauges.
 
 ### agent.start(script[, opts])
 

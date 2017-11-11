@@ -10,6 +10,8 @@ module.exports = emitter;
 module.exports.onStart = fn => child.start(fn, emitter);
 module.exports.onStop = child.stop;
 module.exports.send = child.send;
+module.exports.increment = child.increment;
+module.exports.gauge = child.gauge;
 
 module.exports.createAgent = StartleAgent.create;
 
