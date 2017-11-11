@@ -92,13 +92,17 @@ startle.onStop((opts, done) => {
   done();
 });
 
-startle.on('ping', function (timbre) {
-  
-  startle.increment('counter_name');
-  startle.gauge('gauge_name', 0.5);
-  
+startle.on('ping', function (timbre) { 
   startle.send('pong', {assentionRate: 777});
 });
+```
+
+```javascript
+// anywhere in the remote script
+const {increment, gauge} = require('startle');
+
+increment('counter_name');
+gauge('gauge_name', 3.14);
 ```
 
 
