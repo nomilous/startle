@@ -11,7 +11,10 @@
 * added metrics collection
 
 ### 2017/11/11 - 1.3.1
-* prepend group. to group metrics 
+* prepend group. to group metrics
 
 ### 2017/11/11 - 1.3.2
-* add value arg to increment 
+* add value arg to increment
+
+### 2017/11/26 - 1.3.3
+* fix metrics for walking interval problem
